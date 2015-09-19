@@ -1,6 +1,6 @@
 body {
   min-width: 300px;
-  max-width: 400px;
+  max-width: 500px;
   margin: 10px auto;
 }
 
@@ -14,23 +14,20 @@ body {
   border-collapse: separate;
 }
 
-#versions thead th {
-  text-align: left;
-}
-
 #versions tr.updated {
   background-color: #eee;
 }
 
-#versions th {
+#versions tbody th {
   text-align: center;
+  padding-top: 10px;
 }
 
-#versions td {
+#versions thead th, #versions td {
   text-align: right;
 }
 
-#versions td:first-child {
+#versions thead th:first-child, #versions td:first-child {
   text-align: left;
   width: 100%;
 }
