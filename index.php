@@ -252,7 +252,6 @@ function format_interval($interval, $granularity = 2) {
       </a>
     </div>
     <div id="versions">
-      <h3>Latest <a href="https://build.opensuse.org/project/show/openSUSE:Factory">Factory</a> to <a href="https://openqa.opensuse.org/group_overview/1">Next Tumbleweed</a></h3>
       <table>
         <thead>
           <tr>
