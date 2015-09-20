@@ -67,3 +67,9 @@ body {
   border-width: 7px;
   margin-top: -7px;
 }
+
+#last-updated {
+  margin-top: 20px;
+  text-align: center;
+  color: #999;
+}

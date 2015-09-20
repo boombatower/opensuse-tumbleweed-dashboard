@@ -82,6 +82,7 @@ function xml_cache_set($url, $contents) {
 const CACHE_LIFE = 3600;
 
 function xml_cache_get($url) {
+  global $ago;
   static $expired;
 
   if (!isset($expired)) {
@@ -89,7 +90,8 @@ function xml_cache_get($url) {
       $expired = true;
     }
     else {
-      $expired = (time() - (int) file_get_contents('cache/expires')) >= 0;
+      $expired = ($left = time() - (int) file_get_contents('cache/expires')) >= 0;
+      $ago = CACHE_LIFE + $left;
     }
 
     if ($expired) {
@@ -209,6 +211,33 @@ function rpm_list() {
   return $info;
 }
 
+function format_interval($interval, $granularity = 2) {
+  $units = array(
+    '1 year|@count years' => 31536000,
+    '1 month|@count months' => 2592000,
+    '1 week|@count weeks' => 604800,
+    '1 day|@count days' => 86400,
+    '1 hour|@count hours' => 3600,
+    '1 min|@count min' => 60,
+    '1 sec|@count sec' => 1
+  );
+  $output = '';
+  foreach ($units as $key => $value) {
+    $key = explode('|', $key);
+    if ($interval >= $value) {
+      $count = floor($interval / $value);
+      $output .= ($output ? ' ' : '') . ($count == 1 ? $key[0] : str_replace('@count', $count, $key[1]));
+      $interval %= $value;
+      $granularity--;
+    }
+
+    if ($granularity == 0) {
+      break;
+    }
+  }
+  return $output ? $output : '0 sec';
+}
+
 ?>
 <html>
   <head>
@@ -238,6 +267,9 @@ function rpm_list() {
           <?php print $html; ?>
         </tbody>
       </table>
+    </div>
+    <div id="last-updated">
+    Last updated <?php print format_interval($ago); ?> ago. (updated hourly upon request)
     </div>
   </body>
 </html>
