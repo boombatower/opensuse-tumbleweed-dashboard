@@ -76,7 +76,9 @@ function xml_fetch($path, $url_base = API_BASE, $html = false) {
 }
 
 function xml_cache_set($url, $contents) {
-  return file_put_contents('cache/' . sha1($url) . '.xml', $contents);
+  // Only store self://packages on production.
+  if ($_SERVER['HTTP_HOST'] != 'tumbleweed.boombatower.com' || $url == 'self://packages')
+    return file_put_contents('cache/' . sha1($url) . '.xml', $contents);
 }
 
 const CACHE_LIFE = 3600;
@@ -85,8 +87,9 @@ function xml_cache_get($url) {
   global $ago;
   static $expired;
 
+
   if (!isset($expired)) {
-    if (!file_exists('cache/expires')) {
+    if (!empty($_GET['refresh']) || !file_exists('cache/expires')) {
       $expired = true;
     }
     else {
@@ -99,6 +102,7 @@ function xml_cache_get($url) {
         mkdir('cache');
       }
       file_put_contents('cache/expires', time() + CACHE_LIFE);
+      $ago = 0;
     }
   }
 
@@ -114,7 +118,6 @@ function starts_with($haystack, $needle) {
 
 const DOWNLOAD_URL_PREFIX = 'http://download.opensuse.org/repositories/';
 
-$packages = parse_ini();
 function parse_ini($file = 'package.ini', $default_devel_repo = 'openSUSE_Factory') {
   $config = parse_ini_file($file, true);
   foreach ($config as $group => &$entry) {
@@ -141,7 +144,11 @@ function parse_ini($file = 'package.ini', $default_devel_repo = 'openSUSE_Factor
   return $config;
 }
 
-$html = print_packages($packages, rpm_list());
+if (!($html = xml_cache_get('self://packages'))) {
+  $html = print_packages(parse_ini(), rpm_list());
+  xml_cache_set('self://packages', $html);
+}
+
 function print_packages(array $packages, $tumbleweed) {
   $html = '';
   foreach ($packages as $group => $list) {
