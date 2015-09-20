@@ -251,6 +251,7 @@ function format_interval($interval, $granularity = 2) {
     <title>openSUSE Tumbleweed</title>
     <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
     <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=600">
   </head>
   <body>
     <div id="tumbleweed">

@@ -6,7 +6,11 @@ body {
 
 #tumbleweed {
   text-align: center;
-  margin-bottom: 30px;
+  margin: 30px 0;
+}
+
+#versions {
+  margin: 0 20px;
 }
 
 #versions table {
