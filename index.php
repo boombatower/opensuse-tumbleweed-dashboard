@@ -144,7 +144,7 @@ function parse_ini($file = 'package.ini', $default_devel_repo = 'openSUSE_Factor
   return $config;
 }
 
-if (!($html = xml_cache_get('self://packages'))) {
+if (!empty($_GET['rebuild']) || !($html = xml_cache_get('self://packages'))) {
   $html = print_packages(parse_ini(), rpm_list());
   xml_cache_set('self://packages', $html);
 }
