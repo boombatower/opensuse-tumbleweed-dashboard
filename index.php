@@ -147,6 +147,9 @@ function print_packages(array $packages, $tumbleweed) {
       $html .= "<tr><th colspan=\"5\">$group</th></tr>\n";
     }
     foreach ($list as $package) {
+      $tumbleweed_version = $tumbleweed[$package['binary']];
+      $snapshot_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'snapshot');
+      $factory_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'standard');
       if ($devel = devel_info($package['package'])) {
         $devel_version = binary_version($package['binary'], $devel['package'], $devel['project'], $package['devel_repo']);
       }
@@ -154,22 +157,39 @@ function print_packages(array $packages, $tumbleweed) {
         unset($devel_version);
       }
 
-      $snapshot_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'snapshot');
-      $factory_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'standard');
+      $cells = [];
+      $diff_count = -1;
+      $previous = false;
+      foreach (array_reverse(['tumbleweed', 'snapshot', 'factory', 'devel']) as $version) {
+        $version = isset(${$version . '_version'}['version']) ? ${$version . '_version'}['version'] : '';
+        $changed = false;
+        if ($version != $previous) {
+          $changed = true;
+          $diff_count++;
+        }
+        $cells[] = '<td class="version-' . $diff_count . ($changed ? ' changed' : '') . '">' .
+          $version .
+          '</td>';
+        $previous = $version;
+      }
 
-      $package = $package['binary'];
-      $updated = $tumbleweed[$package]['version'] != $factory_version['version'];
-      $html .= "<tr title=\"Tumbleweed: {$tumbleweed[$package]['date']}\nFactory: {$factory_version['mtime']}\"" .
-        ($updated ? ' class="updated"' : '') . ">\n" .
-        "<td>$package</td>\n" .
-        "<td>{$tumbleweed[$package]['version']}</td>\n" .
-        "<td>" . (isset($snapshot_version) ? $snapshot_version['version'] : '') . "</td>\n" .
-        "<td>{$factory_version['version']}</td>\n" .
-        "<td>" . (isset($devel_version) ? $devel_version['version'] : '') . "</td>\n" .
+      $updated = $tumbleweed_version['version'] != $factory_version['version'];
+      $html .= '<tr' .
+        ($updated ? ' title="Newer version present in Factory" class="update-inbound"' : '') . ">\n" .
+        '<td><a href="' . package_url('openSUSE:Factory', $package['package']) . '">' .
+        $package['binary'] .
+        "</a></td>\n" .
+        implode("\n", array_reverse($cells)) .
         "</tr>\n";
     }
   }
   return $html;
+}
+
+function package_url($project, $package, $op = 'show', $repo = 'openSUSE_Factory') {
+  // https://build.opensuse.org/package/show/X11:XOrg/Mesa
+  return "https://build.opensuse.org/package/$op/$project/$package" .
+    ($op == 'binaries' ? '?repository=' . $repo : '');
 }
 
 function rpm_list() {
