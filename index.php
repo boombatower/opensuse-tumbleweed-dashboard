@@ -218,8 +218,8 @@ function rpm_list(array $packages) {
         foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
           if (preg_match('/^(.*)-([\d_.]+)-.*\.rpm$/', (string) $link['href'], $match)) {
             $info[$match[1]] = [
+              'binary' => $match[1],
               'version' => $match[2],
-              'date' => 'lol',
             ];
           }
         }
