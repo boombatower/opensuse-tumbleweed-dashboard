@@ -145,7 +145,8 @@ function parse_ini($file = 'package.ini', $default_devel_repo = 'openSUSE_Factor
 }
 
 if (!empty($_GET['rebuild']) || !($html = xml_cache_get('self://packages'))) {
-  $html = print_packages(parse_ini(), rpm_list());
+  $packages = parse_ini();
+  $html = print_packages($packages, rpm_list($packages));
   xml_cache_set('self://packages', $html);
 }
 
@@ -201,16 +202,26 @@ function package_url($project, $package, $op = 'show', $repo = 'openSUSE_Factory
     ($op == 'binaries' ? '?repository=' . $repo : '');
 }
 
-function rpm_list() {
+function rpm_list(array $packages) {
   $info = [];
-  foreach (['oss' => 'x86_64', 'src-oss' => 'src'] as $repo => $arch) {
-    if ($xml = xml_fetch("tumbleweed/repo/$repo/suse/$arch", 'http://download.opensuse.org', true)) {
-      foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
-        if (preg_match('/^(.*)-([\d_.]+)-.*\.rpm$/', (string) $link['href'], $match)) {
-          $info[$match[1]] = [
-            'version' => $match[2],
-            'date' => 'lol',
-          ];
+  $repos = ['oss' => 'x86_64', 'src-oss' => 'src'];
+  foreach ($packages as $list) {
+    foreach ($list as $package) {
+      // kernel-source package is preferred since it has the desired devel parent.
+      $repo = $package['binary'] == 'kernel-source' ? 'src-oss' : 'oss';
+      $arch = $repos[$repo];
+
+      // Filter to desired package since full list include over 15k entries.
+      $query = '?P=' . $package['binary'] . '*';
+
+      if ($xml = xml_fetch("tumbleweed/repo/$repo/suse/$arch$query", 'http://download.opensuse.org', true)) {
+        foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
+          if (preg_match('/^(.*)-([\d_.]+)-.*\.rpm$/', (string) $link['href'], $match)) {
+            $info[$match[1]] = [
+              'version' => $match[2],
+              'date' => 'lol',
+            ];
+          }
         }
       }
     }
@@ -218,6 +229,7 @@ function rpm_list() {
   return $info;
 }
 
+// Modified from Drupal 7.x.
 function format_interval($interval, $granularity = 2) {
   $units = array(
     '1 year|@count years' => 31536000,
