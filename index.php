@@ -285,6 +285,7 @@ function format_interval($interval, $granularity = 2) {
     <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=600">
+    <link rel="shortcut icon" href="https://www.opensuse.org/assets/images/favicon.png">
   </head>
   <body>
     <div id="tumbleweed">
