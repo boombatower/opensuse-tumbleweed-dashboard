@@ -228,6 +228,8 @@ function rpm_list(array $packages) {
         foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
           if ($package_info = rpm_version_extract($package['binary'], (string) $link['href'])) {
             $info[$package['binary']] = $package_info;
+          } elseif (isset($info[$package['binary']])) {
+            // Break at the first non-matching binary after matches.
             break;
           }
         }
@@ -239,7 +241,7 @@ function rpm_list(array $packages) {
 
 function rpm_version_extract($binary, $filename) {
   if (!starts_with($filename, $binary . '-32bit-') &&
-       starts_with($filename, $binary) &&
+       starts_with($filename, $binary . '-') &&
        preg_match(RPM_VERSION_REGEX, $filename, $match)) {
     return [
       'binary' => $binary,
