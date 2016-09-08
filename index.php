@@ -312,5 +312,20 @@ function format_interval($interval, $granularity = 2) {
     Last updated <?php print format_interval($ago); ?> ago. (updated hourly upon request)
     [<a href="https://github.com/boombatower/opensuse-tumbleweed-dashboard">source code</a>]
     </div>
+<script type="text/javascript">
+var sc_project=11098572;
+var sc_invisible=1;
+var sc_security="ee187a93";
+var scJsHost = (("https:" == document.location.protocol) ?
+"https://secure." : "http://www.");
+document.write("<sc"+"ript type='text/javascript' src='" +
+scJsHost+
+"statcounter.com/counter/counter.js'></"+"script>");
+</script>
+<noscript><div class="statcounter"><a title="hit counter"
+href="http://statcounter.com/" target="_blank"><img
+class="statcounter"
+src="//c.statcounter.com/11098572/0/ee187a93/1/" alt="hit
+counter"></a></div></noscript>
   </body>
 </html>
