@@ -5,6 +5,19 @@
  */
 const API_BASE = 'https://api.opensuse.org';
 
+/**
+ * Proper regex for parsing package version from full rpm filename.
+ *
+ * Previous substr approach worked fine until llvm decided to add 3_8 to
+ * package name. The following regex extracts the full version number:
+ *
+ * /([^-]+)-[^-]+\.[^\.]+\.rpm$/
+ *
+ * In order to support gcc6 package the regex was altered to strip the
+ * overly long +r123456 part to keep dashboard from overflowing.
+ */
+const RPM_VERSION_REGEX = '/([^-+]+)(?:\+[^-]+)?-[^-]+\.[^\.]+\.rpm$/';
+
 function devel_info($package, $project = 'openSUSE:Factory') {
   // https://api.opensuse.org/source/openSUSE:Factory/Mesa/_meta
   if ($xml = xml_fetch("source/$project/$package/_meta")) {
@@ -18,11 +31,8 @@ function devel_info($package, $project = 'openSUSE:Factory') {
 function binary_version($binary, $package, $project = 'openSUSE:Factory', $repository = 'standard', $arch = 'x86_64') {
   if ($list = binary_list($package, $project, $repository, $arch)) {
     foreach ($list->binary as $entry) {
-      if (starts_with($entry['filename'], $binary)) {
-        return current($entry) + [
-          'binary' => $binary,
-          'version' => current(explode('-', substr($entry['filename'], strlen($binary) + 1), 2)),
-        ];
+      if ($package_info = rpm_version_extract($binary, $entry['filename'])) {
+        return current($entry) + $package_info;
       }
     }
   }
@@ -216,17 +226,28 @@ function rpm_list(array $packages) {
 
       if ($xml = xml_fetch("tumbleweed/repo/$repo/suse/$arch$query", 'http://download.opensuse.org', true)) {
         foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
-          if (preg_match('/^(.*)-([\d_.]+)-.*\.rpm$/', (string) $link['href'], $match)) {
-            $info[$match[1]] = [
-              'binary' => $match[1],
-              'version' => $match[2],
-            ];
+          if ($package_info = rpm_version_extract($package['binary'], (string) $link['href'])) {
+            $info[$package['binary']] = $package_info;
+            break;
           }
         }
       }
     }
   }
   return $info;
+}
+
+function rpm_version_extract($binary, $filename) {
+  if (!starts_with($filename, $binary . '-32bit-') &&
+       starts_with($filename, $binary) &&
+       preg_match(RPM_VERSION_REGEX, $filename, $match)) {
+    return [
+      'binary' => $binary,
+      'version' => $match[1],
+    ];
+  }
+
+  return false;
 }
 
 // Modified from Drupal 7.x.
