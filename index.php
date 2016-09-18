@@ -16,7 +16,7 @@ const API_BASE = 'https://api.opensuse.org';
  * In order to support gcc6 package the regex was altered to strip the
  * overly long +r123456 part to keep dashboard from overflowing.
  */
-const RPM_VERSION_REGEX = '/([^-+]+)(?:\+[^-]+)?-[^-]+\.[^\.]+\.rpm$/';
+const RPM_VERSION_REGEX = '/^{binary}-([^-+]+)(?:\+[^-]+)?-[^-]+\.[^\.]+\.rpm$/';
 
 function devel_info($package, $project = 'openSUSE:Factory') {
   // https://api.opensuse.org/source/openSUSE:Factory/Mesa/_meta
@@ -240,9 +240,8 @@ function rpm_list(array $packages) {
 }
 
 function rpm_version_extract($binary, $filename) {
-  if (!starts_with($filename, $binary . '-32bit-') &&
-       starts_with($filename, $binary . '-') &&
-       preg_match(RPM_VERSION_REGEX, $filename, $match)) {
+    if (preg_match(str_replace('{binary}', $binary, RPM_VERSION_REGEX),
+        $filename, $match)) {
     return [
       'binary' => $binary,
       'version' => $match[1],
