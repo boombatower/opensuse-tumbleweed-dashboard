@@ -126,8 +126,6 @@ function starts_with($haystack, $needle) {
   return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
 }
 
-const DOWNLOAD_URL_PREFIX = 'http://download.opensuse.org/repositories/';
-
 function parse_ini($file = 'package.ini', $default_devel_repo = 'openSUSE_Factory') {
   $config = parse_ini_file($file, true);
   foreach ($config as $group => &$entry) {
