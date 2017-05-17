@@ -310,6 +310,7 @@ function format_interval($interval, $granularity = 2) {
     </div>
     <div id="last-updated">
     Last updated <?php print format_interval($ago); ?> ago. (updated hourly upon request)
+    [<a href="https://github.com/boombatower/opensuse-tumbleweed-dashboard">source code</a>]
     </div>
   </body>
 </html>
