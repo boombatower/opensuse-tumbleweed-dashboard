@@ -167,7 +167,6 @@ function print_packages(array $packages, $tumbleweed) {
     }
     foreach ($list as $package) {
       $tumbleweed_version = $tumbleweed[$package['binary']];
-      $snapshot_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'snapshot');
       $factory_version = binary_version($package['binary'], $package['package'], 'openSUSE:Factory', 'standard');
       if ($devel = devel_info($package['package'])) {
         $devel_version = binary_version($package['binary'], $devel['package'], $devel['project'], $package['devel_repo']);
@@ -179,7 +178,7 @@ function print_packages(array $packages, $tumbleweed) {
       $cells = [];
       $diff_count = -1;
       $previous = false;
-      foreach (array_reverse(['tumbleweed', 'snapshot', 'factory', 'devel']) as $version) {
+      foreach (array_reverse(['tumbleweed', 'factory', 'devel']) as $version) {
         $version = isset(${$version . '_version'}['version']) ? ${$version . '_version'}['version'] : '';
         $changed = false;
         if ($version != $previous) {
@@ -299,7 +298,6 @@ function format_interval($interval, $granularity = 2) {
           <tr>
             <th>Package</th>
             <th>Tumbleweed</th>
-            <th>Snapshot</th>
             <th>Factory</th>
             <th>Devel</th>
           </tr>
