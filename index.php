@@ -225,7 +225,7 @@ function rpm_list(array $packages) {
 
       if ($xml = xml_fetch("tumbleweed/repo/$repo/$arch$query", 'http://download.opensuse.org', true)) {
         foreach ($xml->xpath('//a[contains(@href, ".rpm") and not(contains(@href, ".mirrorlist"))]') as $link) {
-          if ($package_info = rpm_version_extract($package['binary'], (string) $link['href'])) {
+          if ($package_info = rpm_version_extract($package['binary'], substr((string) $link['href'], 2))) {
             $info[$package['binary']] = $package_info;
           } elseif (isset($info[$package['binary']])) {
             // Break at the first non-matching binary after matches.
