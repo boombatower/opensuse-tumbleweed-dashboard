@@ -71,7 +71,8 @@ function xml_fetch($path, $url_base = API_BASE, $html = false) {
 
   if ($contents) {
     if ($html) {
-      $document = @DOMDocument::loadHTML($contents);
+      $document = new DOMDocument();
+      @$document->loadHTML($contents);
       if ($document) {
         return simplexml_import_dom($document);
       }
